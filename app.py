@@ -7,7 +7,7 @@ st.title('AI Assistant Interaction')
 # This function will interact with your Flask API
 def ai_assistant_query(query):
     """Send a query to the AI Assistant Flask API and return the response."""
-    url = f'http://127.0.0.1:5000/ask?query={query}'
+    url = f'https://nztinversive.github.io/Llama3functioncallling-/ask?query={query}'
     response = requests.get(url)
     if response.status_code == 200:
         return json.dumps(response.json(), indent=2)
@@ -32,7 +32,7 @@ task_description = st.text_input("Task Description:")
 
 def manage_todo(action, description):
     """Manage to-do list via API calls."""
-    url = 'http://127.0.0.1:5000/todo'
+    url = 'https://nztinversive.github.io/Llama3functioncallling-/todo'
     if action == "Add Task":
         response = requests.post(url, json={"task": description})
     elif action == "Remove Task":
