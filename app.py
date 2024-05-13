@@ -8,7 +8,7 @@ MODEL = 'llama3-70b-8192'
 
 def get_game_score(team_name):
     """Get the current score for a given NBA game by querying the Flask API."""
-    url = f'http://127.0.0.1:7860/score?team={team_name}'
+    url = f'http://127.0.0.1:5000/score?team={team_name}'
     response = requests.get(url)
     if response.status_code == 200:
         return json.dumps(response.json())
