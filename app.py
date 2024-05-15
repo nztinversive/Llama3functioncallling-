@@ -2,9 +2,10 @@ from groq import Groq
 import os
 import json
 import requests
+import streamlit as st
 
-client = Groq(api_key = os.getenv('GROQ_API_KEY'))
-MODEL = 'llama3-70b-8192'
+client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+MODEL = 'llama3-8b-8192'
 
 def get_game_score(team_name):
     """Get the current score for a given NBA game by querying the Flask API."""
@@ -16,8 +17,7 @@ def get_game_score(team_name):
         return json.dumps({"error": "API request failed", "status_code": response.status_code})
 
 def run_conversation(user_prompt):
-    # Step 1: send the conversation and available functions to the model
-    messages=[
+    messages = [
         {
             "role": "system",
             "content": "You are a function calling LLM that uses the data extracted from the get_game_score function to answer questions around NBA game scores. Include the team and their opponent in your response."
@@ -56,15 +56,11 @@ def run_conversation(user_prompt):
 
     response_message = response.choices[0].message
     tool_calls = response_message.tool_calls
-    # Step 2: check if the model wanted to call a function
     if tool_calls:
-        # Step 3: call the function
-        # Note: the JSON response may not always be valid; be sure to handle errors
         available_functions = {
             "get_game_score": get_game_score,
-        }  # only one function in this example, but you can have multiple
-        messages.append(response_message)  # extend conversation with assistant's reply
-        # Step 4: send the info for each function call and function response to the model
+        }
+        messages.append(response_message)
         for tool_call in tool_calls:
             function_name = tool_call.function.name
             function_to_call = available_functions[function_name]
@@ -79,12 +75,16 @@ def run_conversation(user_prompt):
                     "name": function_name,
                     "content": function_response,
                 }
-            )  # extend conversation with function response
+            )
         second_response = client.chat.completions.create(
             model=MODEL,
             messages=messages
-        )  # get a new response from the model where it can see the function response
+        )
         return second_response.choices[0].message.content
-    
-user_prompt = "What was the score of the Warriors game?"
-print(run_conversation(user_prompt))
+
+# Streamlit code
+st.title('NBA Game Score Checker')
+user_prompt = st.text_input('Enter your question:')
+if st.button('Submit'):
+    result = run_conversation(user_prompt)
+    st.write(result)
